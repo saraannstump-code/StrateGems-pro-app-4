@@ -6,12 +6,9 @@
     <title>StrateGems Pro - Enterprise Launchpad</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    
     <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <script async src="https://js.stripe.com/v3/buy-button.js"></script>
+    <script src="https://js.stripe.com/v3/"></script> 
 
     <style>
         /* --- CORE THEME: CYBER-NOIR --- */
@@ -20,7 +17,7 @@
             --deep-blue: #4B92DB;
             --mint: #6BE7C3;
             --silver: #A0B3D9;
-            --command-color: #F4D03F;
+            --command-color: #F4D03F; /* Gold/Yellow for Command */
         }
 
         body { 
@@ -86,12 +83,14 @@
             color: #FFFFFF;
         }
 
-        /* --- MODULE SPECIFIC COLORS --- */
+        /* --- COLORS --- */
         .module-1 { color: var(--silver); }
         .module-2 { color: var(--neon-teal); text-shadow: 0 0 10px rgba(0, 255, 255, 0.3); }
         .module-3 { color: var(--mint); }
         .module-4 { color: var(--deep-blue); }
         .module-5 { color: #34D399; }
+        .module-6 { color: #F472B6; } 
+        .module-7 { color: #818CF8; }
         .module-command { color: var(--command-color); }
 
         /* --- ANIMATED BACKGROUND --- */
@@ -110,7 +109,6 @@
             100% { opacity: 1; }
         }
         
-        /* Grid Pattern Overlay */
         .grid-overlay {
             position: absolute;
             inset: 0;
@@ -121,13 +119,12 @@
             pointer-events: none;
         }
 
-        /* Custom Scrollbar for Chat */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 
-        /* Modal */
+        /* --- MODAL --- */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -148,13 +145,26 @@
             width: 90%;
             border-radius: 1rem;
         }
-        
-        /* Stripe Button Override to center it */
-        stripe-buy-button {
-            display: block;
-            margin-top: 1rem;
-            width: 100%;
+
+        /* --- FUNNEL --- */
+        .funnel-step {
+            position: relative;
+            background-color: var(--deep-blue);
+            color: white;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
+            font-weight: 700;
+            clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%);
+            transition: all 0.3s ease;
         }
+        .funnel-step:nth-child(1) { width: 100%; opacity: 0.9; }
+        .funnel-step:nth-child(2) { width: 75%; opacity: 0.8; }
+        .funnel-step:nth-child(3) { width: 50%; opacity: 0.7; }
+        .funnel-step:nth-child(4) { width: 25%; opacity: 0.6; }
+        .funnel-step-wrap { display: flex; justify-content: center; }
+        .funnel-label { width: 30%; text-align: right; padding-right: 1rem; font-weight: 600; color: var(--silver); }
+        .funnel-value { width: 70%; text-align: left; font-weight: 600; color: var(--neon-teal); }
     </style>
 </head>
 <body class="flex flex-col">
@@ -163,8 +173,7 @@
     <div class="hero-background z-0"></div>
     <div class="grid-overlay z-0"></div>
 
-    <div id="app-root" class="flex-1 flex flex-col relative z-10">
-    </div>
+    <div id="app-root" class="flex-1 flex flex-col relative z-10"></div>
 
     <div id="api-key-modal" class="modal-overlay">
         <div class="modal-content text-center">
@@ -195,7 +204,9 @@
     </div>
 
     <div id="ai-widget" class="fixed bottom-6 right-6 z-50 flex flex-col items-end font-sans">
+        
         <div id="chat-window" class="hidden w-80 md:w-96 bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl mb-4 overflow-hidden flex flex-col h-[600px] transition-all duration-300">
+            
             <div class="bg-slate-800/80 p-4 border-b border-slate-700/50 flex justify-between items-center">
                 <div class="flex items-center gap-2">
                     <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
@@ -215,14 +226,23 @@
                         <i data-lucide="bot" size="16"></i>
                     </div>
                     <div class="bg-slate-800/80 p-3 rounded-2xl rounded-tl-none text-xs text-slate-300 max-w-[85%] border border-slate-700/50 shadow-sm leading-relaxed">
-                        <p>Commander online. Systems nominal. Welcome to StrateGems Pro.</p>
+                        <p class="mb-2">Commander online. Systems nominal. Welcome to StrateGems Pro. </p>
+                        <p>I am ready to assist. Please use the microphone icon in the chat box if you prefer speaking commands.</p>
+                        <button onclick="speakText(this.parentElement.innerText)" class="mt-2 text-cyan-400 hover:text-white transition-colors" title="Read Aloud">
+                            <i data-lucide="volume-2" size="14"></i>
+                        </button>
                     </div>
                 </div>
             </div>
 
             <div class="p-4 bg-slate-900 border-t border-slate-800">
                 <form onsubmit="handleChat(event)" class="relative">
-                    <input type="text" id="chatInput" placeholder="Type command..." class="w-full bg-black/50 border border-slate-700 rounded-xl pl-4 pr-12 py-3 text-xs text-white focus:border-cyan-500 outline-none transition-all shadow-inner">
+                    <input type="text" id="chatInput" placeholder="Type a command or speak..." class="w-full bg-black/50 border border-slate-700 rounded-xl pl-4 pr-20 py-3 text-xs text-white focus:border-cyan-500 outline-none transition-all shadow-inner">
+                    
+                    <button type="button" onclick="startSpeechRecognition()" id="mic-button" class="absolute right-12 top-2 bg-slate-800 hover:bg-yellow-600 text-slate-400 hover:text-white p-1.5 rounded-lg transition-colors">
+                        <i data-lucide="mic" size="16"></i>
+                    </button>
+
                     <button type="submit" class="absolute right-2 top-2 bg-slate-800 hover:bg-cyan-600 text-slate-400 hover:text-white p-1.5 rounded-lg transition-colors">
                         <i data-lucide="arrow-up" size="16"></i>
                     </button>
@@ -243,17 +263,18 @@
         // --- GLOBAL STATE ---
         var currentPage = 'home';
         var geminiKey = '';
-        var demoMode = true;
+        var demoMode = true; // Default to TRUE for instant use
         const appRoot = document.getElementById('app-root');
         let chatHistory = []; 
+        let isRecording = false;
 
         // ==========================================
         // 💳 STRIPE CONFIGURATION
         // ==========================================
-        // We now use the Stripe Buy Button components directly in the renderPricingPage function.
-        // The Custom link remains a generic contact link.
         const STRIPE_LINKS = {
-            custom: "mailto:sales@strategems.ai"
+            starter: "#", 
+            pro:     "#", 
+            custom:  "mailto:sales@strategems.ai"
         };
         
         // ==========================================
@@ -264,9 +285,9 @@
                 title: "StrateGems Pro",
                 subtitle: "The unified AI suite that manages content creation, deep financial analysis, autonomous marketing, and smart ledger engineering.",
                 features: [
-                    { name: "Diamond Strategist", icon: "brain", desc: "Predictive Strategic Synthesis.", color: "module-1" },
-                    { name: "Ruby Content Engine", icon: "video", desc: "Thought-to-Video Processing.", color: "module-2" },
-                    { name: "Emerald Code Auditor", icon: "shield-check", desc: "Zero-Latency Compliance.", color: "module-3" },
+                    { name: "Diamond Strategist", icon: "brain", desc: "Predictive Strategic Synthesis: Forecasts market outcomes 58+ hours in advance.", color: "module-1" },
+                    { name: "Ruby Content Engine", icon: "video", desc: "Thought-to-Video Processing: Generates ultra-realistic video content from text.", color: "module-2" },
+                    { name: "Emerald Code Auditor", icon: "shield-check", desc: "Zero-Latency Compliance: Real-time auditing for PCI-DSS compliance.", color: "module-3" },
                 ]
             },
             features: {
@@ -276,44 +297,27 @@
                     { name: "3. The Emerald Code Auditor", desc: "Zero-Latency Compliance.", icon: "shield-check", color: "module-3" },
                     { name: "4. The Legal Compass AI", desc: "Predictive Legal Synthesis.", icon: "scale", color: "module-4" },
                     { name: "5. The Financial Ledger AI", desc: "Zero-Latency Orchestration.", icon: "bar-chart-3", color: "module-5" },
+                    { name: "6. The Psycho-Somatic AI", desc: "Biometric Cognitive Optimization.", icon: "activity", color: "module-6" },
+                    { name: "7. The Quantum Neural Link", desc: "Subconscious Data Pre-processing.", icon: "cpu", color: "module-7" },
+                    { name: "8. The Onyx Negotiator", desc: "Real-Time Psychological Intelligence.", icon: "mic", color: "module-1" },
+                    { name: "9. The Sapphire Holo-Twin", desc: "Autonomous Presence Avatar.", icon: "user-check", color: "module-4" },
+                    { name: "10. The Obsidian Oracle", desc: "Black Swan Simulation Engine.", icon: "globe", color: "module-2" },
                 ]
             },
             pricing: {
-                tiers: [
-                    { 
-                        name: "Starter", 
-                        price: "$29", 
-                        interval: "/mo", 
-                        description: "Essential tools.", 
-                        // Using Buy Button ID #1
-                        buyButtonId: "buy_btn_1SdLqO3FMmyCXqutFj5vlLtS", 
-                        isPopular: false, 
-                        benefits: ["5 core AI Modules", "Basic Content", "Email Support"] 
-                    },
-                    { 
-                        name: "Pro", 
-                        price: "$99", 
-                        interval: "/mo", 
-                        description: "Full access.", 
-                        // Using Buy Button ID #2
-                        buyButtonId: "buy_btn_1SdM0X3FMmyCXqutQBMWD7YC", 
-                        isPopular: true, 
-                        benefits: ["ALL 10 Modules", "Mission Control AI", "Priority Support"] 
-                    },
-                    { 
-                        name: "Enterprise", 
-                        price: "Custom", 
-                        interval: "/mo", 
-                        description: "Tailored infrastructure.", 
-                        link: STRIPE_LINKS.custom, 
-                        isPopular: false, 
-                        benefits: ["Private AI Cluster", "On-Premise", "24/7 Dedicated Team"] 
-                    }
-                ]
+                    tiers: [
+                        { name: "Starter", price: "$29", interval: "/mo", description: "Essential tools.", link: STRIPE_LINKS.starter, isPopular: false, benefits: ["5 core AI Modules", "Basic Content", "Email Support"] },
+                        { name: "Pro", price: "$99", interval: "/mo", description: "Full access.", link: STRIPE_LINKS.pro, isPopular: true, benefits: ["ALL 10 Modules", "Mission Control AI", "Priority Support"] },
+                        { name: "Enterprise", price: "Custom", interval: "/mo", description: "Tailored infrastructure.", link: STRIPE_LINKS.custom, isPopular: false, benefits: ["Private AI Cluster", "On-Premise", "24/7 Dedicated Team"] }
+                    ]
+            },
+            command: {
+                title: "Strategic Command Center",
+                subtitle: "Your personal dashboard for managing and analyzing strategic market intelligence and deployment status.",
             }
         };
 
-        // --- RENDER FUNCTIONS (VIEW LOGIC) ---
+        // --- RENDER FUNCTIONS ---
         
         const navigateTo = (page) => {
             currentPage = page;
@@ -322,7 +326,7 @@
         };
 
         const renderNavBar = () => {
-             const pages = ['home', 'features', 'pricing']; 
+             const pages = ['home', 'features', 'command', 'pricing']; 
              return `
                 <header class="glass-header sticky top-0 z-40 w-full transition-all duration-300">
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
@@ -343,6 +347,7 @@
                         </nav>
                         <div class="flex items-center">
                             <button onclick="navigateTo('pricing')" class="hidden md:block bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-bold border border-white/10 transition-all">Launch App</button>
+                            <button class="md:hidden text-white ml-4"><i data-lucide="menu"></i></button>
                         </div>
                     </div>
                 </header>
@@ -358,14 +363,13 @@
                     </div>
                     <h1 class="text-6xl md:text-8xl font-black text-white mb-8 leading-tight tracking-tight">AI That <br/><span class="bg-clip-text text-transparent bg-gradient-to-r from-[#00FFFF] via-[#4B92DB] to-[#A0B3D9]">Builds Your Business.</span></h1>
                     <p class="text-xl md:text-2xl text-slate-400 max-w-3xl mx-auto mb-12 leading-relaxed font-light">${data.subtitle}</p>
-                    
                     <div class="max-w-md mx-auto relative group">
                         <div class="absolute -inset-1 bg-gradient-to-r from-cyan-400 to-blue-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-                        <button onclick="navigateTo('pricing')" class="relative cta-button block w-full py-5 rounded-xl text-black font-extrabold transition-all text-center text-xl flex items-center justify-center gap-3">
+                        <a href="${STRIPE_LINKS.pro}" target="_blank" class="relative cta-button block w-full py-5 rounded-xl text-black font-extrabold transition-all text-center text-xl flex items-center justify-center gap-3">
                             <span>Get Full Access</span><i data-lucide="arrow-right" size="20"></i>
-                        </button>
+                        </a>
+                        <p class="text-xs text-slate-500 mt-4 tracking-wide">NO COMMITMENT • CANCEL ANYTIME • INSTANT SETUP</p>
                     </div>
-
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-24 text-left">
                         ${data.features.map(f => `
                             <div class="glass-card p-8 rounded-2xl group cursor-default">
@@ -384,8 +388,8 @@
             return `
                 <section class="max-w-6xl mx-auto pt-20 pb-24 px-4">
                     <div class="text-center mb-16">
-                        <h2 class="text-4xl md:text-5xl font-black text-white mb-6">The AI Modules</h2>
-                        <p class="text-slate-400 max-w-2xl mx-auto text-lg">Your enterprise-grade AI core is built from autonomous, self-optimizing agents.</p>
+                        <h2 class="text-4xl md:text-5xl font-black text-white mb-6">The 10 AI Modules</h2>
+                        <p class="text-slate-400 max-w-2xl mx-auto text-lg">Your enterprise-grade AI core is built from 10 autonomous, self-optimizing agents working in perfect unison.</p>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-24">
                         ${data.modules.map(m => `
@@ -394,6 +398,116 @@
                                 <div><h3 class="text-xl font-bold text-white mb-2">${m.name}</h3><p class="text-sm text-slate-400 leading-relaxed">${m.desc}</p></div>
                             </div>
                         `).join('')}
+                    </div>
+                    <div class="border-t border-slate-800 pt-20">
+                        <div class="flex items-center gap-4 mb-10">
+                            <div class="w-12 h-12 rounded-full bg-cyan-900/20 flex items-center justify-center text-cyan-400 animate-pulse"><i data-lucide="sparkles" size="24"></i></div>
+                            <div><h2 class="text-3xl font-bold text-white">Live Intelligence Showcase</h2><p class="text-slate-500 text-sm">Interact with the core. (Simulation Mode Active by Default)</p></div>
+                        </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            <div class="glass-card p-6 rounded-2xl flex flex-col h-full">
+                                <div class="flex items-center gap-2 mb-4 text-module-1"><i data-lucide="brain" size="20"></i><h3 class="font-bold text-white">Diamond Strategist</h3></div>
+                                <p class="text-xs text-slate-400 mb-4 h-10">Generates 3-step predictive market strategies based on your product concept.</p>
+                                <textarea id="strategyInput" rows="3" class="w-full bg-black/40 border border-slate-700 rounded-lg p-3 text-xs text-white focus:border-cyan-500 outline-none mb-4 resize-none font-mono" placeholder="Input product idea..."></textarea>
+                                <button onclick="generateStrategy()" class="cta-secondary w-full py-2 rounded-lg text-xs font-bold mb-4 hover:bg-white/10">GENERATE STRATEGY</button>
+                                <div id="strategyResult" class="flex-1 bg-black/60 rounded-lg p-3 border border-slate-800 text-xs font-mono text-slate-300 overflow-y-auto max-h-40 min-h-[100px]">Waiting for input...</div>
+                            </div>
+                            <div class="glass-card p-6 rounded-2xl flex flex-col h-full">
+                                <div class="flex items-center gap-2 mb-4 text-module-2"><i data-lucide="video" size="20"></i><h3 class="font-bold text-white">Ruby Content Engine</h3></div>
+                                <p class="text-xs text-slate-400 mb-4 h-10">Rewrites basic descriptions into high-value, viral sales copy.</p>
+                                <textarea id="enhancerInput" rows="3" class="w-full bg-black/40 border border-slate-700 rounded-lg p-3 text-xs text-white focus:border-cyan-500 outline-none mb-4 resize-none font-mono" placeholder="Input basic description..."></textarea>
+                                <button onclick="enhanceDescription()" class="cta-secondary w-full py-2 rounded-lg text-xs font-bold mb-4 hover:bg-white/10">ENHANCE COPY</button>
+                                <div id="enhancerResult" class="flex-1 bg-black/60 rounded-lg p-3 border border-slate-800 text-xs font-mono text-slate-300 overflow-y-auto max-h-40 min-h-[100px]">Waiting for input...</div>
+                            </div>
+                            <div class="glass-card p-6 rounded-2xl flex flex-col h-full">
+                                <div class="flex items-center gap-2 mb-4 text-module-3"><i data-lucide="code" size="20"></i><h3 class="font-bold text-white">Emerald Code Gen</h3></div>
+                                <p class="text-xs text-slate-400 mb-4 h-10">Generates secure, production-ready code snippets on demand.</p>
+                                <textarea id="codeInput" rows="3" class="w-full bg-black/40 border border-slate-700 rounded-lg p-3 text-xs text-white focus:border-cyan-500 outline-none mb-4 resize-none font-mono" placeholder="Describe component..."></textarea>
+                                <button onclick="generateCode()" class="cta-secondary w-full py-2 rounded-lg text-xs font-bold mb-4 hover:bg-white/10">GENERATE CODE</button>
+                                <div id="codeResult" class="flex-1 bg-black/60 rounded-lg p-3 border border-slate-800 text-xs font-mono text-slate-300 overflow-y-auto max-h-40 min-h-[100px]">Waiting for input...</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            `;
+        };
+        
+        const renderCommandPage = () => {
+            const data = PAGE_CONTENT.command;
+            return `
+                <section class="max-w-6xl mx-auto pt-20 pb-24 px-4">
+                    <div class="text-center mb-16">
+                        <h2 class="text-4xl md:text-5xl font-black text-white mb-4 module-command">${data.title}</h2>
+                        <p class="text-slate-400 max-w-2xl mx-auto text-lg">${data.subtitle}</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="glass-card p-8 rounded-2xl flex flex-col h-full col-span-1">
+                            <div class="flex items-center gap-3 mb-4 text-green-400">
+                                <i data-lucide="cloud-lightning" size="24"></i>
+                                <h3 class="text-xl font-bold text-white">Deployment Status</h3>
+                            </div>
+                            <p class="text-sm text-slate-400 mb-4">Monitor all live deployments and server health metrics instantly.</p>
+                            <div class="text-xs font-mono space-y-3 pt-2">
+                                <div class="flex justify-between items-center text-green-300"><span>Primary Cluster:</span><span class="font-bold">ONLINE</span></div>
+                                <div class="flex justify-between items-center text-slate-300"><span>Latency:</span><span class="font-bold">28ms</span></div>
+                                <div class="flex justify-between items-center text-slate-300"><span>Uptime:</span><span class="font-bold">99.98%</span></div>
+                                <div class="flex justify-between items-center text-slate-300"><span>Last Sync:</span><span class="font-bold">2m ago</span></div>
+                            </div>
+                            <button class="cta-secondary w-full py-2 rounded-lg text-xs mt-6 border-green-500/30 text-green-300 hover:bg-green-800/20">VIEW LIVE LOGS</button>
+                        </div>
+                        
+                        <div class="glass-card p-8 rounded-2xl flex flex-col h-full col-span-2">
+                            <div class="flex items-center gap-3 mb-4 text-module-command">
+                                <i data-lucide="command" size="24"></i>
+                                <h3 class="text-xl font-bold text-white">Strategic Roadmap Manager (Onyx)</h3>
+                            </div>
+                            <p class="text-sm text-slate-400 mb-4">Define and refine your internal strategy using the Onyx Negotiator module.</p>
+                            <textarea id="roadmapInput" rows="5" class="w-full bg-black/40 border border-slate-700 rounded-lg p-3 text-xs text-white focus:border-yellow-500 outline-none mb-4 resize-none font-mono" placeholder="Goal: Achieve 10k users by Q2. Strategy: Focus on paid media and influencer outreach..."></textarea>
+                            <button onclick="generateRoadmap()" class="cta-secondary w-full py-3 rounded-lg text-sm font-bold mb-4 hover:bg-yellow-800/20 border-yellow-500/30 text-yellow-300">OPTIMIZE ROADMAP</button>
+                            <div id="roadmapResult" class="flex-1 bg-black/60 rounded-lg p-3 border border-slate-800 text-xs font-mono text-slate-300 overflow-y-auto min-h-[100px]">Roadmap output will appear here...</div>
+                        </div>
+
+                        <div class="glass-card p-8 rounded-2xl col-span-3">
+                             <div class="flex items-center gap-3 mb-6 text-module-2">
+                                <i data-lucide="bar-chart-3" size="24"></i>
+                                <h3 class="text-xl font-bold text-white">Funnel Visualization & Agent Status</h3>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                <div class="col-span-2 space-y-2">
+                                    <div class="flex items-center text-xs font-mono"><div class="funnel-label">AWARENESS:</div><div class="funnel-value">12,500 Engagements</div></div>
+                                    <div class="funnel-step-wrap"><div class="funnel-step bg-cyan-700">TOP OF FUNNEL</div></div>
+
+                                    <div class="flex items-center text-xs font-mono"><div class="funnel-label">CONSIDERATION:</div><div class="funnel-value">4,120 Visits</div></div>
+                                    <div class="funnel-step-wrap"><div class="funnel-step bg-cyan-700" style="width: 75%;">MID-FUNNEL</div></div>
+
+                                    <div class="flex items-center text-xs font-mono"><div class="funnel-label">CONVERSION:</div><div class="funnel-value">980 Sign-ups</div></div>
+                                    <div class="funnel-step-wrap"><div class="funnel-step bg-cyan-700" style="width: 50%;">BOTTOM OF FUNNEL</div></div>
+                                    
+                                    <div class="flex items-center text-xs font-mono"><div class="funnel-label">REVENUE:</div><div class="funnel-value">125 Pro Subscriptions</div></div>
+                                    <div class="funnel-step-wrap"><div class="funnel-step bg-green-700" style="width: 25%;">SUCCESS</div></div>
+                                </div>
+                                <div class="col-span-1 border border-slate-800 p-4 rounded-lg flex flex-col items-center justify-center text-center">
+                                    <div class="text-6xl text-module-command mb-3">🤖</div>
+                                    <h4 class="text-lg font-bold text-white">Ruby Agent Status</h4>
+                                    <p class="text-xs text-slate-400">Autonomous Marketer is active and optimizing funnel conversions.</p>
+                                    <span class="text-xs font-mono text-green-400 mt-2">Status: 99% Efficiency</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="glass-card p-8 rounded-2xl col-span-3">
+                             <div class="flex items-center gap-3 mb-6 text-module-2">
+                                <i data-lucide="gem" size="24"></i>
+                                <h3 class="text-xl font-bold text-white">Ruby Agent Customer Offerings (Marketing Tier)</h3>
+                            </div>
+                            <ul class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-300">
+                                <li class="flex items-start gap-3"><i data-lucide="check-circle" size="18" class="text-cyan-400 mt-1 flex-shrink-0"></i><span>**Thought-to-Video Processing:** Generate ultra-realistic marketing videos directly from text ideas.</span></li>
+                                <li class="flex items-start gap-3"><i data-lucide="check-circle" size="18" class="text-cyan-400 mt-1 flex-shrink-0"></i><span>**Autonomous Funnel Optimization:** AI auto-replaces underperforming content without manual intervention.</span></li>
+                                <li class="flex items-start gap-3"><i data-lucide="check-circle" size="18" class="text-cyan-400 mt-1 flex-shrink-0"></i><span>**Multi-Channel Copy Generation:** Instantly produce tailored headlines, social posts, and email subject lines.</span></li>
+                                <li class="flex items-start gap-3"><i data-lucide="check-circle" size="18" class="text-cyan-400 mt-1 flex-shrink-0"></i><span>**Real-Time Engagement Scoring:** Content is scored instantly based on predictive viral potential before launch.</span></li>
+                            </ul>
+                        </div>
                     </div>
                 </section>
             `;
@@ -405,37 +519,33 @@
                 <section class="max-w-7xl mx-auto pt-24 pb-32 px-4">
                     <div class="text-center mb-16">
                         <h2 class="text-4xl md:text-5xl font-black text-white mb-6">Secure Your Access</h2>
-                        <p class="text-slate-400 text-lg">Instant activation. Enterprise-grade security.</p>
+                        <p class="text-slate-400 text-lg">Instant activation. Enterprise-grade security. Scale as you grow.</p>
                     </div>
-
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
                         ${data.tiers.map(tier => `
                             <div class="glass-card p-8 rounded-2xl flex flex-col items-center text-center relative ${tier.isPopular ? 'border-cyan-500/50 shadow-[0_0_40px_rgba(0,255,255,0.15)] transform md:-translate-y-4 z-10 bg-slate-900/80' : ''}">
                                 ${tier.isPopular ? `<div class="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-black text-xs font-extrabold rounded-full shadow-lg tracking-wider">MOST POPULAR</div>` : ''}
                                 <h3 class="text-2xl font-bold text-white mb-2">${tier.name}</h3>
                                 <div class="flex items-baseline gap-1 mb-4">
-                                    <span class="text-5xl font-black text-white tracking-tight">${tier.price}</span>
+                                    <span class="text-5xl font-black text-white tracking-tight">${tier.price === 'Custom' ? 'Custom' : tier.price}</span>
                                     ${tier.price !== 'Custom' ? `<span class="text-lg text-slate-500 font-medium">${tier.interval}</span>` : ''}
                                 </div>
                                 <p class="text-sm text-slate-400 mb-8 h-10 flex items-center justify-center">${tier.description}</p>
-                                
                                 <div class="w-full space-y-4 mb-8 text-left border-t border-b border-white/5 py-6">
                                     ${tier.benefits.map(b => `<div class="flex items-start gap-3 text-slate-300"><i data-lucide="check" size="16" class="text-cyan-400 mt-1 flex-shrink-0"></i><span class="text-sm">${b}</span></div>`).join('')}
                                 </div>
-                                
-                                ${tier.buyButtonId ? `
-                                    <stripe-buy-button
-                                      buy-button-id="${tier.buyButtonId}"
-                                      publishable-key="pk_live_51Sa5YC3FMmyCXqutRjeokyhQ50Q6pEMFkAT477aC5DyhcxOHASOV0sJD0bEfBGMts4LUJcxf6AV3RM0Kzx81J1nW00WnjRKIfm"
-                                    >
-                                    </stripe-buy-button>
-                                ` : `
-                                    <a href="${tier.link}" class="cta-secondary w-full py-4 rounded-xl text-lg font-bold flex items-center justify-center gap-2 group">
-                                        Contact Sales<i data-lucide="arrow-right" size="18" class="group-hover:translate-x-1 transition-transform"></i>
-                                    </a>
-                                `}
+                                <a href="${tier.link}" target="_blank" class="${tier.isPopular ? 'cta-button' : 'cta-secondary'} w-full py-4 rounded-xl text-lg font-bold flex items-center justify-center gap-2 group">
+                                    ${tier.price === 'Custom' ? 'Contact Sales' : 'Activate Now'}<i data-lucide="arrow-right" size="18" class="group-hover:translate-x-1 transition-transform"></i>
+                                </a>
                             </div>
                         `).join('')}
+                    </div>
+                    <div class="mt-20 text-center max-w-lg mx-auto p-6 glass-card">
+                         <h3 class="text-xl font-bold text-white mb-3">Family & Friends Promotion</h3>
+                         <p class="text-sm text-slate-400 mb-6">Request a 7-day, All-Tier promotional access code for trusted users.</p>
+                         <button onclick="requestPromoCode()" class="w-full py-3 rounded-xl text-sm font-bold bg-yellow-600 hover:bg-yellow-500 text-black transition-colors shadow-md shadow-yellow-900/40">
+                             REQUEST 7-DAY FREE TRIAL
+                         </button>
                     </div>
                 </section>
              `;
@@ -446,31 +556,59 @@
             if (currentPage === 'home') pageHtml = renderHomePage();
             else if (currentPage === 'features') pageHtml = renderFeaturesPage();
             else if (currentPage === 'pricing') pageHtml = renderPricingPage();
-            
+            else if (currentPage === 'command') pageHtml = renderCommandPage();
             appRoot.innerHTML = renderNavBar() + pageHtml;
-            lucide.createIcons(); 
+            lucide.createIcons();
         };
 
-        // --- MODAL & CHAT FUNCTIONS ---
-
-        const hideModal = () => {
-            document.getElementById('api-key-modal').style.display = 'none';
-        }
-
+        // --- MODAL & LOGIC FUNCTIONS ---
+        const hideModal = () => { document.getElementById('api-key-modal').style.display = 'none'; }
         const showKeyModal = () => {
+            document.getElementById('modal-icon').innerHTML = '<i data-lucide="cpu" class="text-cyan-400"></i>';
+            document.getElementById('modal-title').textContent = 'Initialize AI Core';
+            document.getElementById('modal-subtitle').textContent = 'Connect to the Gemini API for live intelligence, or run in Simulation Mode for mock data.';
+            document.getElementById('geminiKeyInputModal').placeholder = 'Paste Gemini API Key...';
+            document.getElementById('modal-main-button').textContent = 'Connect & Initialize';
+            document.getElementById('modal-main-button').onclick = () => saveKey(true);
+            document.getElementById('modal-secondary-button').textContent = 'Enter Simulation Mode (No Key)';
+            document.getElementById('modal-secondary-button').onclick = () => useDemoMode(true);
+            document.getElementById('modal-link').style.display = 'block';
+            document.getElementById('modal-or-divider').style.display = 'flex';
+            lucide.createIcons();
             document.getElementById('api-key-modal').style.display = 'flex';
         }
-
+        const showPromoModal = () => {
+            document.getElementById('modal-icon').innerHTML = '<i data-lucide="award" class="text-yellow-400"></i>';
+            document.getElementById('modal-title').textContent = 'Request Trial Code';
+            document.getElementById('modal-subtitle').textContent = 'Enter a valid email address where we can send the 7-day promotional code to your friend/family member.';
+            document.getElementById('geminiKeyInputModal').placeholder = 'Enter recipient email address...';
+            document.getElementById('modal-main-button').textContent = 'SEND REQUEST';
+            document.getElementById('modal-main-button').onclick = () => sendPromoCode();
+            document.getElementById('modal-secondary-button').textContent = 'Cancel';
+            document.getElementById('modal-secondary-button').onclick = () => hideModal();
+            document.getElementById('modal-link').style.display = 'none';
+            document.getElementById('modal-or-divider').style.display = 'none';
+            lucide.createIcons();
+            document.getElementById('api-key-modal').style.display = 'flex';
+        }
+        
+        const sendPromoCode = () => {
+             const email = document.getElementById('geminiKeyInputModal').value.trim();
+             if (email.includes('@') && email.includes('.')) {
+                 hideModal();
+                 addMessage('ai', `Trial request successfully simulated. A 7-day code has been 'sent' to ${email}. The promotional system is functioning!`);
+             } else {
+                 document.getElementById('modal-subtitle').textContent = "Please enter a valid email address.";
+                 document.getElementById('modal-subtitle').classList.add('text-red-400');
+             }
+        }
+        function requestPromoCode() { showPromoModal(); }
         function toggleChat() {
             const chatWindow = document.getElementById('chat-window');
             chatWindow.classList.toggle('hidden');
-            if (!chatWindow.classList.contains('hidden') && !geminiKey && !demoMode) {
-                showKeyModal();
-            } else {
-                hideModal();
-            }
+            if (!chatWindow.classList.contains('hidden') && !geminiKey && !demoMode) showKeyModal();
+            else hideModal();
         }
-
         function saveKey(fromModal = false) {
             const inputId = fromModal ? 'geminiKeyInputModal' : 'chatInput'; 
             const key = document.getElementById(inputId).value.trim();
@@ -484,22 +622,64 @@
                 document.getElementById('modal-subtitle').classList.add('text-red-400');
             }
         }
-
         function useDemoMode(fromModal = false) {
             demoMode = true;
             geminiKey = '';
             hideModal();
             addMessage('ai', 'Simulation Mode Engaged. I will utilize mock data for all requests.');
         }
-
         function resetKey(fromModal = false) {
             geminiKey = '';
             demoMode = false;
-            if (fromModal) {
-                 showKeyModal();
-            } else {
-                 addMessage('ai', 'AI Core reset. Please re-enter your key or activate Simulation Mode.');
+            if (fromModal) showKeyModal();
+            else addMessage('ai', 'AI Core reset. Please re-enter your key or activate Simulation Mode.');
+        }
+        
+        // --- VOICE RECOGNITION ---
+        function startSpeechRecognition() {
+            if (!('webkitSpeechRecognition' in window)) {
+                addMessage('ai', 'Voice input not supported in this browser environment. Please use text input.');
+                return;
             }
+            const recognition = new webkitSpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+            const micButton = document.getElementById('mic-button');
+            const inputField = document.getElementById('chatInput');
+            
+            if (isRecording) { recognition.stop(); return; }
+            
+            isRecording = true;
+            micButton.classList.add('bg-red-600', 'animate-pulse');
+            inputField.placeholder = "Listening... Speak now.";
+            
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                inputField.value = transcript;
+                isRecording = false;
+                micButton.classList.remove('bg-red-600', 'animate-pulse');
+                inputField.placeholder = "Type a command or speak...";
+                handleChat({ preventDefault: () => {} });
+            };
+            recognition.onerror = function(event) {
+                isRecording = false;
+                micButton.classList.remove('bg-red-600', 'animate-pulse');
+                inputField.placeholder = "Error, try again...";
+            };
+            recognition.onend = function() {
+                isRecording = false;
+                micButton.classList.remove('bg-red-600', 'animate-pulse');
+                inputField.placeholder = "Type a command or speak...";
+            };
+            recognition.start();
+        }
+
+        function generateRoadmap() {
+            const val = document.getElementById('roadmapInput').value;
+            const prompt = `Act as the Strategic Roadmap Manager. Given the following internal goal and strategy: "${val}", provide a three-phase plan to achieve it.`;
+            const demo = `**🗺️ STRATEGIC ROADMAP:**<br>Phase 1 (Q1): **Infrastructure Audit.** Focus on optimizing cloud spend (target: -15%).<br>Phase 2 (Q2): **Market Penetration.** Deploy targeted micro-campaigns.<br>Phase 3 (Q3): **Feature Freeze & Scale.** Allocate resources to scaling.`;
+            runDemoFeature(prompt, 'roadmapInput', 'roadmapResult', demo, 'module-command');
         }
 
         async function handleChat(e) {
@@ -507,16 +687,12 @@
             const input = document.getElementById('chatInput');
             const text = input.value.trim();
             if(!text) return;
-
             addMessage('user', text);
             input.value = '';
             chatHistory.push({ role: "user", parts: [{ text: text }] });
-
             if (!geminiKey) demoMode = true;
-
             const loadingId = addMessage('ai', 'Processing...');
-            
-            // SIMULATION MODE
+
             if(demoMode) {
                 setTimeout(() => {
                     const demoResponses = [
@@ -526,35 +702,79 @@
                         "Simulation Mode response: Request logged."
                     ];
                     const randomResponse = demoResponses[Math.floor(Math.random() * demoResponses.length)];
-                    const html = `${randomResponse} <br><br> <span class="text-[10px] text-yellow-500 font-mono">[SIMULATION MODE]</span>`;
+                    const html = `${randomResponse} <br><br> <span class="text-[10px] text-yellow-500 font-mono">[SIMULATION MODE ACTIVE]</span><button onclick="speakText(this.parentElement.innerText)" class="ml-2 inline-block text-cyan-400 hover:text-white" title="Read Aloud"><i data-lucide="volume-2" size="14"></i></button>`;
                     document.getElementById(loadingId).querySelector('.msg-content').innerHTML = html;
+                    lucide.createIcons();
                 }, 800);
                 return;
             }
-            
-            // REAL API INTEGRATION
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${geminiKey}`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ contents: chatHistory })
-                });
-                
-                const data = await response.json();
-                
-                if(data.error) {
-                    throw new Error(data.error.message);
-                }
-
-                const aiText = data.candidates[0].content.parts[0].text;
-                document.getElementById(loadingId).querySelector('.msg-content').innerText = aiText;
-                chatHistory.push({ role: "model", parts: [{ text: aiText }] });
-
-            } catch (error) {
-                document.getElementById(loadingId).querySelector('.msg-content').innerHTML = `<span class="text-red-400">Error: ${error.message}</span>`;
+                 const responseText = await callGemini(text);
+                 const html = `${responseText}<button onclick="speakText(this.parentElement.innerText)" class="ml-2 inline-block text-cyan-400 hover:text-white" title="Read Aloud"><i data-lucide="volume-2" size="14"></i></button>`;
+                 document.getElementById(loadingId).querySelector('.msg-content').innerHTML = html;
+                 lucide.createIcons();
+            } catch (err) {
+                 document.getElementById(loadingId).querySelector('.msg-content').innerText = "System Alert: Connection failed.";
             }
         }
 
+        async function runDemoFeature(prompt, inputId, resultId, demoText, colorClass = 'module-1') {
+            const inputElement = document.getElementById(inputId);
+            const resultElement = document.getElementById(resultId);
+            if (!inputElement.value) { resultElement.innerHTML = "<span class='text-red-400'>Input required.</span>"; return; }
+            resultElement.innerHTML = `<span class='animate-pulse ${colorClass}'>Processing Data Stream...</span>`;
+            if (!geminiKey) demoMode = true;
+            if (demoMode) {
+                 setTimeout(() => {
+                      resultElement.innerHTML = `${demoText}<br><br><span class="text-yellow-500 text-[10px]">[SIMULATION OUTPUT]</span><button onclick="speakText(this.parentElement.innerText)" class="mt-2 block text-cyan-400 hover:text-white text-xs"><i data-lucide="volume-2" size="14" class="inline mr-1"></i> Read Aloud</button>`;
+                      lucide.createIcons();
+                 }, 1500);
+                 return;
+            }
+            try {
+                const text = await callGemini(prompt);
+                resultElement.innerHTML = `${text}<button onclick="speakText(this.parentElement.innerText)" class="mt-2 block text-cyan-400 hover:text-white text-xs"><i data-lucide="volume-2" size="14" class="inline mr-1"></i> Read Aloud</button>`;
+                lucide.createIcons();
+            } catch (e) {
+                resultElement.innerText = "Error: Computation Failed.";
+            }
+        }
+        function generateStrategy() {
+            const val = document.getElementById('strategyInput').value;
+            const prompt = `Act as a market strategist. Given: "${val}", provide a 3-step plan.`;
+            const demo = `**💎 STRATEGY OUTPUT:**<br>1. **Vertical Integration:** Acquire supply chain dependencies.<br>2. **AI Automation:** Deploy 'Ruby Engine'.<br>3. **Exit Strategy:** Target acquisition in Q3 2026.`;
+            runDemoFeature(prompt, 'strategyInput', 'strategyResult', demo);
+        }
+        function enhanceDescription() {
+            const val = document.getElementById('enhancerInput').value;
+            const prompt = `Rewrite into sales copy: "${val}"`;
+            const demo = `**✨ RUBY ENHANCED COPY:**<br>"Redefine possibility. Our architecture doesn't just process data—it orchestrates reality, converting raw intent into measurable outcomes with zero friction."`;
+            runDemoFeature(prompt, 'enhancerInput', 'enhancerResult', demo);
+        }
+        function generateCode() {
+            const val = document.getElementById('codeInput').value;
+            const prompt = `Write code for: "${val}"`;
+            const demo = `**🛡️ EMERALD CODE:**<br><code class="text-[10px] block mt-1">function auth(token) {<br>  if (verify(token)) return 'GRANTED';<br>  return 'DENIED';<br>}</code>`;
+            runDemoFeature(prompt, 'codeInput', 'codeResult', demo);
+        }
+        function speakText(text) {
+            const cleanText = text.replace(/🔊|Read Aloud|\[SIMULATION OUTPUT\]|\[SIMULATION MODE ACTIVE\]/g, '').trim();
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            const voices = window.speechSynthesis.getVoices();
+            const preferredVoice = voices.find(v => v.name.includes("Google US English") || v.name.includes("Samantha") || v.lang === 'en-US');
+            if (preferredVoice) utterance.voice = preferredVoice;
+            window.speechSynthesis.speak(utterance);
+        }
+        async function callGemini(prompt) {
+             const MODEL_NAME = 'gemini-2.5-flash-preview-09-2025';
+             const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${geminiKey}`;
+             const payload = { contents: [{ parts: [{ text: prompt }] }] };
+             const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+             if (!response.ok) throw new Error("API Error");
+             const result = await response.json();
+             return result.candidates?.[0]?.content?.parts?.[0]?.text || "No response generated.";
+        }
         function addMessage(role, text) {
             const id = 'msg-' + Date.now();
             const messagesDiv = document.getElementById('messages');
@@ -567,6 +787,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             renderApp();
+            window.speechSynthesis.getVoices();
         });
     </script>
 </body>
