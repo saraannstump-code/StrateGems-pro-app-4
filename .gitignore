@@ -1,5 +1,1 @@
-# Local Netlify folder
-.netlify
-
-*aiCoder/llmConfig*key*
-*aiCoder/backups/*
+*.env
