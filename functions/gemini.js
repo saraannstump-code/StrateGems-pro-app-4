@@ -1,9 +1,4 @@
-// netlify/functions/gemini.js
-<RequestId>BF392FMPQ174KQWF</RequestI
-// netlify/functions/gemini.js
-// netlify/functions/gemini.js
-<RequestId>BF392FMPQ174KQWF</RequestI
-<RequestId>BF392FMPQ174KQWF</RequestI
+
 
 copy con gemini.js
 // netlify/functions/gemini.js
