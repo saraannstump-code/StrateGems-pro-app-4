@@ -1,0 +1,6 @@
+ [build]
+  publish = "."  # Tells Netlify to look in the current folder for the index.html file.
+
+[functions]
+  node_bundler = "esbuild"
+  directory = "functions" 

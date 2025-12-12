@@ -1,0 +1,1 @@
+﻿{ "name": "strategems-pro-app", "version": "1.0.0", "description": "Project for online production and strategy.", "scripts": { "dev": "npm start", "start": "echo Application is ready to run.", "install": "echo Dependencies handled by lock file", "build": "echo Running final build (Deployment preparation)!" }, "keywords": [], "author": "", "license": "ISC" }
